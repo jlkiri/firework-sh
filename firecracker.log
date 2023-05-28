@@ -1,0 +1,7 @@
+Running Firecracker v1.3.1
+2023-05-29T01:53:58.846495448 [anonymous-instance:main:INFO:src/vmm/src/device_manager/mmio.rs:392] Artificially kick devices.
+2023-05-29T01:53:58.846674040 [anonymous-instance:main:INFO:src/firecracker/src/main.rs:509] Successfully started microvm that was configured from one single json
+2023-05-29T01:53:59.008670570 [anonymous-instance:main:DEBUG:src/devices/src/virtio/block/event_handler.rs:35] block: activate event
+2023-05-29T01:53:59.010693088 [anonymous-instance:main:DEBUG:src/devices/src/virtio/net/event_handler.rs:42] net: activate event
+2023-05-29T01:53:59.011385322 [anonymous-instance:fc_vcpu 1:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
+2023-05-29T01:53:59.017922285 [anonymous-instance:fc_vcpu 1:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
