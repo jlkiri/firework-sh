@@ -22,8 +22,14 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     systemd \
     iptables \
     vim \
-    dnsmasq \
-    && rm -rf /var/lib/apt/lists/*
+    dnsmasq && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    rm -f /etc/systemd/system/*.wants/* /lib/systemd/system/*.wants/* && \
+    rm /etc/systemd/system/systemd-resolved.service || true && \
+    # rm /usr/lib/systemd/system/systemd-resolved.service || true \
+    rm /lib/systemd/system/systemd-resolved.service || true
+    
 
 RUN curl -OL https://github.com/opencontainers/runc/releases/download/v1.1.7/runc.amd64 && \
     chmod +x runc.amd64 && \
@@ -53,7 +59,3 @@ WantedBy=multi-user.target
 EOF
 
 COPY . .
-
-RUN rm /etc/systemd/system/systemd-resolved.service || true && \
-    rm /usr/lib/systemd/system/systemd-resolved.service || true \
-    rm /lib/systemd/system/systemd-resolved.service || true

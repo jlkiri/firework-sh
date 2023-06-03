@@ -13,7 +13,8 @@ RUN apk update \
 	&& rc-update add sysfs boot \
     && rc-update add cgroups boot \
     && rc-update add networking sysinit \
-	&& rc-update add local default
+	&& rc-update add local default \
+	&& rc-update add containerd default
 
 RUN mkdir -p /run/openrc \
 	&& touch /run/openrc/softlevel \
