@@ -1,6 +1,10 @@
+# syntax=docker/dockerfile:1.3-labs
+
 FROM scratch
 
 ADD rootfs /
+
+WORKDIR /firework
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     apt-get install -y \
@@ -12,42 +16,44 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     git \
     make \
     netcat-traditional \
-    localepurge \
     dnsutils \ 
     iputils-ping \
     cpu-checker \
-    wireguard \
+    systemd \
+    iptables \
+    vim \
+    dnsmasq
     && rm -rf /var/lib/apt/lists/*
 
-# # Install Docker
-# RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-#     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list && \
-#     apt-get update && \
-#     apt-get install -y docker-ce docker-ce-cli containerd.io
+RUN curl -OL https://github.com/opencontainers/runc/releases/download/v1.1.7/runc.amd64 && \
+    chmod +x runc.amd64 && \
+    mv runc.amd64 /usr/local/bin/runc
 
-# COPY config/docker/docker.service /etc/systemd/system/docker.service.d/override.conf
-
-# # Needed to make Docker work
-# RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
+RUN curl -OL https://github.com/moby/buildkit/releases/download/v0.11.6/buildkit-v0.11.6.linux-amd64.tar.gz && \
+    tar -xvf buildkit-v0.11.6.linux-amd64.tar.gz -C /usr/local
 
 # Generate guest SSH keys
 RUN ssh-keygen -A
 
+# RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
+
 # configure sshd
-RUN sed -i 's/^#\(PermitRootLogin\) .*/\1 yes/' /etc/ssh/sshd_config
-RUN sed -i 's/^#\(PasswordAuthentication\) .*/\1 no/' /etc/ssh/sshd_config
+RUN sed -i 's/^#\(PermitRootLogin\) .*/\1 yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#\(PasswordAuthentication\) .*/\1 no/' /etc/ssh/sshd_config
 
-RUN apt autoremove -y
-RUN apt clean
-RUN apt autoclean
-RUN localepurge
+COPY <<EOF /etc/systemd/system/buildkitd.service
+[Unit]
+Description=Buildkit daemon
 
-# RUN systemctl daemon-reload
+[Service]
+ExecStart=/usr/local/bin/buildkitd
 
-# COPY config/dnsmasq@.service /etc/systemd/system/dnsmasq@.service
-# COPY config/local.conf /etc/dnsmasq.d/local.conf
+[Install]
+WantedBy=multi-user.target
+EOF
 
-# RUN systemctl disable systemd-resolved
-# RUN systemctl enable docker
-# RUN systemctl enable dnsmasq@local
-# RUN systemctl enable consul
+COPY . .
+
+RUN rm /etc/systemd/system/systemd-resolved.service || true && \
+    rm /usr/lib/systemd/system/systemd-resolved.service || true \
+    rm /lib/systemd/system/systemd-resolved.service || true

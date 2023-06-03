@@ -8,8 +8,10 @@ cd "$script_dir"
 
 source vars.sh
 
+nameserver=$1
+
 rootfs="$rootfs_dir/rootfs.ext4"
-kernel_boot_args="init=/lib/systemd/systemd console=ttyS0 reboot=k panic=1 pci=off"
+kernel_boot_args="console=ttyS0 noapic reboot=k panic=1 pci=off"
 # kernel_boot_args="$kernel_boot_args ip=$vm_ip::$tap_ip:$mask_long::eth0:off"
 kernel_boot_args="$kernel_boot_args ip=:::::eth0:dhcp"
 
@@ -32,7 +34,7 @@ vm_id=$(random_string 8)
 
 echo "Starting a Firecracker VM with id $vm_id..."
 
-function setup_ssh {
+function setup_root_ssh {
   ssh-keygen -t ed25519 -C "firecracker" -f "$tmp_ssh_key_dir/$vm_id" -q -N "" <<<y &>/dev/null
 
   # Copy ssh pub key as authorized_key
@@ -48,35 +50,19 @@ function create_tap_dev {
   ip tuntap add dev "$tap_dev" mode tap
   ip link set dev "$tap_dev" up
   ip link set "$tap_dev" master fcbr0
-
+  
+  sysctl -w net.ipv4.conf.all.forwarding=1
+  sysctl -w net.ipv4.conf."$tap_dev".proxy_arp=1 > /dev/null
   sysctl -w net.ipv4.conf."$tap_dev".proxy_arp=1 > /dev/null
   sysctl -wq net.ipv4.neigh.default.gc_thresh1=1024
   sysctl -wq net.ipv4.neigh.default.gc_thresh2=2048
   sysctl -wq net.ipv4.neigh.default.gc_thresh3=4096
 }
 
-function generate_guest_ipv6_id {
-  echo -n "$(random_string 4):$(random_string 4):$(random_string 4):$(random_string 4)"
-}
-
 function setup_guest_network {
-  mkdir -p $tmp_mount_target/etc/netplan
-
-  # guest_ipv6="fd99::$(generate_guest_ipv6_id)/64"
-
-  cat > "$tmp_mount_target/etc/netplan/config-$vm_id.yaml" <<EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      dhcp4: false
-      dhcp6: false
-      nameservers:
-        addresses:
-          - 1.1.1.1
-EOF
-  # echo -n "$guest_ipv6"
+  touch "$tmp_mount_target/etc/resolv.conf"
+  echo "nameserver $nameserver" > "$tmp_mount_target/etc/resolv.conf"
+  echo -e "auto eth0\niface eth0 inet dhcp" > "$tmp_mount_target/etc/network/interfaces"
 }
 
 tap_dev="fctapvm$vm_id"
@@ -96,11 +82,12 @@ echo "DONE: Create a new rootfs for VM based on $rootfs"
 {
   umount -l "$tmp_mount_target" &> /dev/null || true
   mount -o loop "$tmp_rootfs" "$tmp_mount_target"
-  setup_ssh "$vm_id"
+
+  setup_root_ssh "$vm_id"
   echo "DONE: Generate SSH keys, id: $vm_id"
 
   setup_guest_network
-  echo "DONE: Setup guest network with netplan"
+  echo "DONE: Setup guest network"
 
   umount -l "$tmp_mount_target" &> /dev/null || true
   echo "DONE: Copy additional files to VM rootfs"
@@ -108,10 +95,6 @@ echo "DONE: Create a new rootfs for VM based on $rootfs"
 
 create_tap_dev
 echo "DONE: Created tap device $tap_dev"
-
-# Needed for setup with firewalls
-# sudo iptables -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-# sudo iptables -A FORWARD -i $TAP_DEV -o $HOST_IFACE -j ACCEPT
 
 touch "$script_dir/firecracker.log"
 

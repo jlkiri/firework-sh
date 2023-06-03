@@ -11,21 +11,23 @@ vm_subnet="10.0.0.0/16"
 
 function cleanup {
     ip link del "$vm_bridge" || true
-    iptables -t nat -D POSTROUTING -o "$public_if" -s "$vm_subnet" -j MASQUERADE || true
-    iptables -D FORWARD -i "$vm_bridge" -o "$public_if" -j ACCEPT || true
-    iptables -D FORWARD -o "$vm_bridge" -i "$public_if" -j ACCEPT || true
+    iptables -t nat -D POSTROUTING ! -o "$vm_bridge" -s "$vm_subnet" -j MASQUERADE || true
+    iptables -t filter -D FORWARD -i "$vm_bridge" ! -o "$vm_bridge" -j ACCEPT || true
+    iptables -t filter -D FORWARD -i "$vm_bridge" -o "$vm_bridge" -j ACCEPT || true
+    iptables -t filter -D FORWARD -o "$vm_bridge" -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT || true
     systemctl stop dnsmasq || true
 }
 
 function add_default_iptables {
     set +e
-    iptables -t nat -C POSTROUTING -o "$public_if" -s "$vm_subnet" -j MASQUERADE &> /dev/null
+    iptables -t nat -C POSTROUTING ! -o "$vm_bridge" -s "$vm_subnet" -j MASQUERADE &> /dev/null
 
     # If the rule does not exist, add it
     if [ $? -ne 0 ]; then
-        iptables -t nat -A POSTROUTING -o "$public_if" -s "$vm_subnet" -j MASQUERADE
-        iptables -A FORWARD -i "$vm_bridge" -o "$public_if" -j ACCEPT &> /dev/null
-        iptables -A FORWARD -o "$vm_bridge" -i "$public_if" -j ACCEPT &> /dev/null
+        iptables -t nat -A POSTROUTING ! -o "$vm_bridge" -s "$vm_subnet" -j MASQUERADE &> /dev/null
+        iptables -t filter -A FORWARD -i "$vm_bridge" ! -o "$vm_bridge" -j ACCEPT &> /dev/null
+        iptables -t filter -A FORWARD -i "$vm_bridge" -o "$vm_bridge" -j ACCEPT &> /dev/null
+        iptables -t filter -A FORWARD -o "$vm_bridge" -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT &> /dev/null
     fi
     set -e
 }
