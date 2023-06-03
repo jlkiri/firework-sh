@@ -1,11 +1,11 @@
 Running Firecracker v1.3.1
-2023-06-03T21:31:34.983609022 [anonymous-instance:main:WARN:src/devices/src/legacy/serial.rs:257] Failed to register serial input fd: event_manager: failed to manage epoll file descriptor: Operation not permitted (os error 1)
-2023-06-03T21:31:34.984194401 [anonymous-instance:main:INFO:src/vmm/src/device_manager/mmio.rs:392] Artificially kick devices.
-2023-06-03T21:31:34.984255945 [anonymous-instance:main:INFO:src/firecracker/src/main.rs:509] Successfully started microvm that was configured from one single json
-2023-06-03T21:31:35.114422546 [anonymous-instance:main:DEBUG:src/devices/src/virtio/block/event_handler.rs:35] block: activate event
-2023-06-03T21:31:35.115992171 [anonymous-instance:main:DEBUG:src/devices/src/virtio/net/event_handler.rs:42] net: activate event
-2023-06-03T21:31:35.116744567 [anonymous-instance:fc_vcpu 0:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
-2023-06-03T21:31:35.123627067 [anonymous-instance:fc_vcpu 0:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
+2023-06-03T23:57:12.264013002 [anonymous-instance:main:WARN:src/devices/src/legacy/serial.rs:257] Failed to register serial input fd: event_manager: failed to manage epoll file descriptor: Operation not permitted (os error 1)
+2023-06-03T23:57:12.264318589 [anonymous-instance:main:INFO:src/vmm/src/device_manager/mmio.rs:392] Artificially kick devices.
+2023-06-03T23:57:12.264367439 [anonymous-instance:main:INFO:src/firecracker/src/main.rs:509] Successfully started microvm that was configured from one single json
+2023-06-03T23:57:12.383025736 [anonymous-instance:main:DEBUG:src/devices/src/virtio/block/event_handler.rs:35] block: activate event
+2023-06-03T23:57:12.384775573 [anonymous-instance:main:DEBUG:src/devices/src/virtio/net/event_handler.rs:42] net: activate event
+2023-06-03T23:57:12.385501645 [anonymous-instance:fc_vcpu 1:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
+2023-06-03T23:57:12.392391661 [anonymous-instance:fc_vcpu 1:WARN:src/devices/src/legacy/i8042.rs:121] Failed to trigger i8042 kbd interrupt (disabled by guest OS)
 2023-06-03T15:52:13.896266456 [anonymous-instance:main:INFO:src/vmm/src/lib.rs:777] Vmm is stopping.
 2023-06-03T15:52:13.896404174 [anonymous-instance:fc_api:INFO:src/api_server/src/parsed_request.rs:216] The API server received a Put request on "/shutdown-internal".
 2023-06-03T15:52:13.896417644 [anonymous-instance:fc_api:DEBUG:src/api_server/src/lib.rs:209] Total previous API call duration: 19 us.

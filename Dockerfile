@@ -22,7 +22,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     systemd \
     iptables \
     vim \
-    dnsmasq
+    dnsmasq \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -OL https://github.com/opencontainers/runc/releases/download/v1.1.7/runc.amd64 && \
@@ -35,7 +35,7 @@ RUN curl -OL https://github.com/moby/buildkit/releases/download/v0.11.6/buildkit
 # Generate guest SSH keys
 RUN ssh-keygen -A
 
-# RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
+RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 
 # configure sshd
 RUN sed -i 's/^#\(PermitRootLogin\) .*/\1 yes/' /etc/ssh/sshd_config && \
