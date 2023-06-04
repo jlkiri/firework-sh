@@ -44,15 +44,6 @@ tar -xf "$base_rootfs" -C "$mount_dir"
 
 echo "Pre-installing programs in the base rootfs image with Docker..."
 
-# img_id=$(docker build . -t rootfs)
-# container_id=$(docker run --rm --tty --detach rootfs /bin/bash)
-
-# echo "Copying the contents of the container back to the rootfs..."
-# docker cp $container_id:/ $mount_dir
-
-# ssh-keygen -t ed25519 -C "firecracker" -f "$tmp_ssh_key_dir/$vm_id" -q -N "" <<<y &>/dev/null
-# cp "$tmp_ssh_key_dir/$vm_id.pub" .
-
 mkdir -p "$tmp_rootfs"
 buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --output type=local,dest="$tmp_rootfs"
 

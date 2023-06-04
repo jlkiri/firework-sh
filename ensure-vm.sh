@@ -17,9 +17,7 @@ firecracker_url="https://github.com/firecracker-microvm/firecracker/releases/dow
 rootfs_base="$downloads_dir/rootfs.tar.xz"
 
 function ensure_rootfs {
-    if [[ ! -e "$rootfs_base" ]]; then
-        curl -L "$rootfs_url" -o "$rootfs_base"
-    fi
+    curl -L "$rootfs_url" -o "$rootfs_base"
 }
 
 function ensure_firecracker {

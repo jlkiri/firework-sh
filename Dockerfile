@@ -19,7 +19,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     dnsutils \ 
     iputils-ping \
     cpu-checker \
-    systemd \
     iptables \
     vim \
     dnsmasq && \
@@ -43,18 +42,24 @@ RUN update-alternatives --set iptables /usr/sbin/iptables-legacy
 RUN sed -i 's/^#\(PermitRootLogin\) .*/\1 yes/' /etc/ssh/sshd_config && \
     sed -i 's/^#\(PasswordAuthentication\) .*/\1 no/' /etc/ssh/sshd_config
 
-COPY <<EOF /etc/systemd/system/buildkitd.service
-[Unit]
-Description=Buildkit daemon
+# COPY <<EOF /etc/systemd/system/buildkitd.service
+# [Unit]
+# Description=Buildkit daemon
 
-[Service]
-ExecStart=/usr/local/bin/buildkitd
+# [Service]
+# ExecStart=/usr/local/bin/buildkitd
 
-[Install]
-WantedBy=multi-user.target
-EOF
+# [Install]
+# WantedBy=multi-user.target
+# EOF
 
-RUN printf "systemctl enable buildkitd" >> /etc/profile
-RUN printf "systemctl disable systemd-resolved" >> /etc/profile
+# RUN printf "systemctl enable buildkitd\n" >> /etc/profile
+# RUN printf "systemctl disable systemd-resolved" >> /etc/profile
 
-COPY . .
+COPY config config
+COPY kernel kernel
+COPY vm vm
+COPY macgen.py .
+COPY *.sh .
+COPY Dockerfile .
+COPY .gitignore .
